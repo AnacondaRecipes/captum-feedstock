@@ -7,8 +7,11 @@ package:
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/captum-{{ version }}.tar.gz
-  sha256: 7ca87d0dc67b3b7589a730b970b9536172a5468e0e31bf8657fdd73abc568a33
+  - url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/captum-{{ version }}.tar.gz
+    sha256: 7ca87d0dc67b3b7589a730b970b9536172a5468e0e31bf8657fdd73abc568a33
+  - git_url: https://github.com/pytorch/captum
+    git_rev: v0.7.0
+    folder: upstream
 
 build:
   number: 0
@@ -16,6 +19,8 @@ build:
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
 
 requirements:
+  build:
+    - git  # [not win]
   host:
     - pip
     - python
@@ -30,13 +35,23 @@ requirements:
     - tqdm
 
 test:
+  source_files:
+    - upstream/tests
   imports:
     - captum
     - captum._utils
   commands:
     - pip check
+    - pytest upstream/tests
   requires:
     - pip
+    - pytest
+    - sphinx
+    - mypy >=0.760
+    - scikit-learn
+    - parameterized
+    - flask
+    - flask-compress
 
 about:
   home: https://captum.ai
