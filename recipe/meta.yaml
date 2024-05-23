@@ -25,6 +25,7 @@ requirements:
     - pip
     - python
     - setuptools
+    - wheel
   run:
     - python
     - matplotlib-base
@@ -59,6 +60,7 @@ about:
   dev_url: https://github.com/pytorch/captum
   license: BSD-3-Clause
   license_file: LICENSE
+  license_family: BSD
   description: |
     Captum is a model interpretability and understanding library for PyTorch.
     Captum means comprehension in Latin and contains general purpose
