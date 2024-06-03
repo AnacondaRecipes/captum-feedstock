@@ -42,7 +42,8 @@ test:
     - captum._utils
   commands:
     - pip check
-    - pytest upstream/tests
+    - pytest upstream/tests  # [not win]
+    - pytest upstream/tests --ignore="upstream/tests/attr/test_data_parallel.py"  # [win]
   requires:
     - pip
     - pytest
