@@ -42,11 +42,12 @@ test:
     - captum._utils
   commands:
     - pip check
-    - pytest upstream/tests  # [not win and not (osx and x86 and py==312)]
+    - pytest upstream/tests  # [not win and not (osx and x86)]
     # Bypass dependency conflict for scikit-learn on osx-64 with python 3.12.
-    - pytest upstream/tests -k "not test_llm_attr_without_token"  # [osx and x86 and py==312]
-    # Test collection error on Windows.
-    - pytest upstream/tests --ignore="upstream/tests/attr/test_data_parallel.py"  # [win]
+    - pytest upstream/tests -k "not test_llm_attr_without_token" --ignore="upstream/tests/attr/test_data_parallel.py" # [osx and x86 and py==312]
+    # Test collection error on Windows and osx-64
+    - pytest upstream/tests --ignore="upstream/tests/attr/test_data_parallel.py"  # [win or (osx and x86 and py<312)]
+
   requires:
     - pip
     - pytest
