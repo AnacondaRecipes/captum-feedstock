@@ -28,7 +28,7 @@ requirements:
   run:
     - python
     - matplotlib-base
-    - numpy {{ numpy }}
+    - numpy
     - pytorch >=1.6
     # seems to be optional since upstream says "It will try to use tqdm if available"
     # but it is also imported in production code
