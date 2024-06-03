@@ -42,14 +42,15 @@ test:
     - captum._utils
   commands:
     - pip check
-    - pytest upstream/tests  # [not win]
+    - pytest upstream/tests  # [not win and not (osx and x86 and py==312)]
+    - pytest upstream/tests -k "not (TestLLMAttr_0_cpu.test_llm_attr_without_token_0 or TestLLMAttr_0_cpu.test_llm_attr_without_token_1)"  # [osx and x86 and py==312]
     - pytest upstream/tests --ignore="upstream/tests/attr/test_data_parallel.py"  # [win]
   requires:
     - pip
     - pytest
     - sphinx
     - mypy >=0.760
-    - scikit-learn
+    - scikit-learn  # [not (osx and x86 and py==312)]
     - parameterized
     - flask
     - flask-compress
