@@ -1,5 +1,5 @@
 {% set name = "captum" %}
-{% set version = "0.5.0" %}
+{% set version = "0.7.0" %}
 
 
 package:
@@ -7,32 +7,56 @@ package:
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/captum-{{ version }}.tar.gz
-  sha256: 84af2c8793d34c440a351793b5ca705b8542745e2dc8bc24afb1d9b86f3bf6ec
+  - url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/captum-{{ version }}.tar.gz
+    sha256: 7ca87d0dc67b3b7589a730b970b9536172a5468e0e31bf8657fdd73abc568a33
+  - git_url: https://github.com/pytorch/captum
+    git_rev: v0.7.0
+    folder: upstream
 
 build:
   number: 0
-  noarch: python
-  script: {{ PYTHON }} -m pip install . -vv
+  script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
 
 requirements:
+  build:
+    - git  # [not win]
   host:
     - pip
-    - python >=3.6
+    - python
+    - setuptools
+    - wheel
   run:
-    - python >=3.6
+    - python
     - matplotlib-base
     - numpy
     - pytorch >=1.6
+    # seems to be optional since upstream says "It will try to use tqdm if available"
+    # but it is also imported in production code
+    - tqdm
 
 test:
+  source_files:
+    - upstream/tests
   imports:
     - captum
     - captum._utils
   commands:
     - pip check
+    - pytest upstream/tests  # [not win and not (osx and x86)]
+    # Bypass dependency conflict for scikit-learn on osx-64 with python 3.12.
+    - pytest upstream/tests -k "not test_llm_attr_without_token" --ignore="upstream/tests/attr/test_data_parallel.py" # [osx and x86 and py==312]
+    # Test collection error on Windows and osx-64
+    - pytest upstream/tests --ignore="upstream/tests/attr/test_data_parallel.py"  # [win or (osx and x86 and py<312)]
+
   requires:
     - pip
+    - pytest
+    - sphinx
+    - mypy >=0.760
+    - scikit-learn  # [not (osx and x86 and py==312)]
+    - parameterized
+    - flask
+    - flask-compress
 
 about:
   home: https://captum.ai
@@ -40,6 +64,7 @@ about:
   dev_url: https://github.com/pytorch/captum
   license: BSD-3-Clause
   license_file: LICENSE
+  license_family: BSD
   description: |
     Captum is a model interpretability and understanding library for PyTorch.
     Captum means comprehension in Latin and contains general purpose
