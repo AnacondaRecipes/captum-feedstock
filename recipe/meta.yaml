@@ -1,14 +1,13 @@
 {% set name = "captum" %}
-{% set version = "0.7.0" %}
-
+{% set version = "0.8.0" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  - url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/captum-{{ version }}.tar.gz
-    sha256: 7ca87d0dc67b3b7589a730b970b9536172a5468e0e31bf8657fdd73abc568a33
+  - url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/captum-{{ version }}.tar.gz
+    sha256: 73f2e5a07ffe6ac6647a6f12cd2f67f0d8f717329f150ddf08ef73cba0858d26
   - git_url: https://github.com/pytorch/captum
     git_rev: v0.7.0
     folder: upstream
@@ -16,6 +15,7 @@ source:
 build:
   number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
+  skip: true  # [py<39]
 
 requirements:
   build:
@@ -28,11 +28,12 @@ requirements:
   run:
     - python
     - matplotlib-base
-    - numpy
-    - pytorch >=1.6
+    - numpy <2.0
+    - pytorch >=1.10
     # seems to be optional since upstream says "It will try to use tqdm if available"
     # but it is also imported in production code
     - tqdm
+    - packaging
 
 test:
   source_files:
@@ -44,10 +45,9 @@ test:
     - pip check
     - pytest upstream/tests  # [not win and not (osx and x86)]
     # Bypass dependency conflict for scikit-learn on osx-64 with python 3.12.
-    - pytest upstream/tests -k "not test_llm_attr_without_token" --ignore="upstream/tests/attr/test_data_parallel.py" # [osx and x86 and py==312]
+    - "pytest upstream/tests -k \"not test_llm_attr_without_token\" --ignore=\"upstream/tests/attr/test_data_parallel.py\""  # [osx and x86 and py==312]
     # Test collection error on Windows and osx-64
-    - pytest upstream/tests --ignore="upstream/tests/attr/test_data_parallel.py"  # [win or (osx and x86 and py<312)]
-
+    - "pytest upstream/tests --ignore=\"upstream/tests/attr/test_data_parallel.py\""  # [win or (osx and x86 and py<312)]
   requires:
     - pip
     - pytest
