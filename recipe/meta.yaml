@@ -14,12 +14,10 @@ source:
     folder: upstream
 
 build:
-  number: 0
+  number: 1
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
 
 requirements:
-  build:
-    - git  # [not win]
   host:
     - pip
     - python
