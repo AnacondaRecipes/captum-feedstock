@@ -1,14 +1,13 @@
 {% set name = "captum" %}
-{% set version = "0.7.0" %}
-
+{% set version = "0.9.0" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  - url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/captum-{{ version }}.tar.gz
-    sha256: 7ca87d0dc67b3b7589a730b970b9536172a5468e0e31bf8657fdd73abc568a33
+  - url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/captum-{{ version }}.tar.gz
+    sha256: e4868e22b68224f1a5355d2b7966803c021cf9fe5d893f51f587b4002a666b54
   - git_url: https://github.com/pytorch/captum
     git_rev: v0.7.0
     folder: upstream
@@ -25,6 +24,7 @@ requirements:
     - python
     - setuptools
     - wheel
+    - pytorch {{ pytorch }}
   run:
     - python
     - matplotlib-base
@@ -44,10 +44,9 @@ test:
     - pip check
     - pytest upstream/tests  # [not win and not (osx and x86)]
     # Bypass dependency conflict for scikit-learn on osx-64 with python 3.12.
-    - pytest upstream/tests -k "not test_llm_attr_without_token" --ignore="upstream/tests/attr/test_data_parallel.py" # [osx and x86 and py==312]
+    - pytest upstream/tests -k "not test_llm_attr_without_token" --ignore="upstream/tests/attr/test_data_parallel.py"  # [osx and x86 and py==312]
     # Test collection error on Windows and osx-64
     - pytest upstream/tests --ignore="upstream/tests/attr/test_data_parallel.py"  # [win or (osx and x86 and py<312)]
-
   requires:
     - pip
     - pytest
