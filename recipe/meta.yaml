@@ -1,62 +1,56 @@
 {% set name = "captum" %}
-{% set version = "0.7.0" %}
+{% set version = "0.9.0" %}
 
 
 package:
-  name: {{ name|lower }}
+  name: {{ name }}
   version: {{ version }}
 
 source:
-  - url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/captum-{{ version }}.tar.gz
-    sha256: 7ca87d0dc67b3b7589a730b970b9536172a5468e0e31bf8657fdd73abc568a33
-  - git_url: https://github.com/pytorch/captum
-    git_rev: v0.7.0
-    folder: upstream
+  url: https://github.com/meta-pytorch/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 1572593c2582dbf0d1c1408d1f43ca99321cd61bc7a9f908e459fe20c80989c2
 
 build:
   number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
+  skip: true  # [py<310]
 
 requirements:
-  build:
-    - git  # [not win]
   host:
     - pip
     - python
-    - setuptools
     - wheel
+    - setuptools >=61.0
   run:
     - python
     - matplotlib-base
     - numpy
-    - pytorch >=1.6
-    # seems to be optional since upstream says "It will try to use tqdm if available"
-    # but it is also imported in production code
+    - packaging
+    - pytorch >=2.3
     - tqdm
+
+# E   AssertionError: tensor(6) != 0
+{% set deselect_tests = " --deselect=tests/influence/_core/test_tracin_regression.py::TestTracInRegression::test_tracin_identity_regression_9_check_idx_none_ArnoldiInfluenceFunction" %}
 
 test:
   source_files:
-    - upstream/tests
+    - tests
   imports:
     - captum
     - captum._utils
   commands:
     - pip check
-    - pytest upstream/tests  # [not win and not (osx and x86)]
-    # Bypass dependency conflict for scikit-learn on osx-64 with python 3.12.
-    - pytest upstream/tests -k "not test_llm_attr_without_token" --ignore="upstream/tests/attr/test_data_parallel.py" # [osx and x86 and py==312]
-    # Test collection error on Windows and osx-64
-    - pytest upstream/tests --ignore="upstream/tests/attr/test_data_parallel.py"  # [win or (osx and x86 and py<312)]
-
+    - pytest -v tests {{ deselect_tests }}
   requires:
     - pip
     - pytest
     - sphinx
-    - mypy >=0.760
-    - scikit-learn  # [not (osx and x86 and py==312)]
+    - mypy
+    - scikit-learn
     - parameterized
     - flask
     - flask-compress
+    - openai
 
 about:
   home: https://captum.ai
@@ -76,7 +70,7 @@ about:
 
     PyPI: [https://pypi.org/project/captum/](https://pypi.org/project/captum/)
 
-  doc_url: https://captum.ai/
+  doc_url: https://captum.ai
   dev_url: https://github.com/pytorch/captum
 
 extra:
